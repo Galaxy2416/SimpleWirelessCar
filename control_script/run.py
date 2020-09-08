@@ -1,4 +1,3 @@
-#! python2
 import pythoncom, pyHook
 
 import serial
@@ -6,20 +5,20 @@ import serial.tools.list_ports
 
 
 def OnKeyboardEventInfo(event):
-    print 'MessageName:',event.MessageName
-    print 'Message:',event.Message
-    print 'Time:',event.Time
-    print 'Window:',event.Window
-    print 'WindowName:',event.WindowName
-    print 'Ascii:', event.Ascii, chr(event.Ascii)
-    print 'Key:', event.Key
-    print 'KeyID:', event.KeyID
-    print 'ScanCode:', event.ScanCode
-    print 'Extended:', event.Extended
-    print 'Injected:', event.Injected
-    print 'Alt', event.Alt
-    print 'Transition', event.Transition
-    print '---'
+    print ('MessageName:{}'.format(event.MessageName))
+    print ('Message:{}'.format(event.Message))
+    print ('Time:{}'.format(event.Time))
+    print ('Window:{}'.format(event.Window))
+    print ('WindowName:{}'.format(event.WindowName))
+    print ('Ascii:{} {}'.format(event.Ascii, chr(event.Ascii)))
+    print ('Key:{}'.format(event.Key))
+    print ('KeyID:{}'.format(event.KeyID))
+    print ('ScanCode:{}'.format(event.ScanCode))
+    print ('Extended:{}'.format(event.Extended))
+    print ('Injected:{}'.format(event.Injected))
+    print ('Alt:{}'.format(event.Alt))
+    print ('Transition:{}'.format(event.Transition))
+    print ('---')
 
 # return True to pass the event to other handlers
     return True
@@ -64,8 +63,8 @@ class serialSender:
                 if str(list(i)[2]).find(vid_pid) != -1 : # VID:PID = XXXX:XXXX
                     port_list_use =list(i)
                     port_serial = port_list_use[0]
-                    self.ser = serial.Serial(port_serial,9600,timeout = 60)
-                    print ("Find the port >",self.ser)
+                    self.ser = serial.Serial(port_serial,9600, timeout = 60)
+                    print ("Find the port >", self.ser)
                     break
             if self.ser == 0:
                 print("Cannot find the port of wireless serial.")
@@ -84,30 +83,31 @@ class serialSender:
                 
             
     def OnKeyboardEventDown(self,event):
-        if self.key_dir.has_key(event.KeyID):
+        if event.KeyID in self.key_dir:
             self.status_list[self.key_dir[event.KeyID]] = True;
-            # OnKeyboardEventInfo(event)
+            OnKeyboardEventInfo(event)
         cmd = self.get_the_cmd(self.cmd)
         if cmd != self.cmd:
             self.cmd = cmd;
-            self.ser.write(chr(self.cmd))
+            self.ser.write(chr(self.cmd).encode())
            # print self.cmd 
             
         return True
     
     def OnKeyboardEventUp(self,event):
-        if self.key_dir.has_key(event.KeyID):
+        if event.KeyID in self.key_dir:
             self.status_list[self.key_dir[event.KeyID]] = False;
-            # OnKeyboardEventInfo(event)
+            OnKeyboardEventInfo(event)
         self.cmd = self.get_the_cmd(self.cmd)
-        self.ser.write(chr(self.cmd))
+        self.ser.write(chr(self.cmd).encode())
         # print self.cmd 
             
         return True 
 
 
 if __name__ == '__main__':
-    # sender
+    print('starting...')
+    #  sender   
     ss = serialSender()
     ss.connect_to_serial()
     # create a hook manager
@@ -119,6 +119,6 @@ if __name__ == '__main__':
 
 
     # set the hook
-hm.HookKeyboard()
-# wait forever
-pythoncom.PumpMessages()
+    hm.HookKeyboard()
+    # wait forever
+    pythoncom.PumpMessages()
